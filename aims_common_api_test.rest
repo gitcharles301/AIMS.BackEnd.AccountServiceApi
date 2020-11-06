@@ -1,0 +1,21 @@
+
+#### GetCountries
+GET http://localhost:8001/api/common/GetCountries
+
+#### GetStates
+
+GET http://localhost:8001/api/common/GetStates
+Content-Type: application/json
+
+{
+    "country_id" :101
+}
+
+#### GetCities
+
+GET http://localhost:8001/api/common/GetCities
+Content-Type: application/json
+
+{
+    "state_id" :35
+}
