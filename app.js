@@ -9,6 +9,7 @@ const port =  process.env.port || 8001;
 const sequelize = new Sequelize(process.env.CONNECTION_STRING) // Example for postgres
 const userRoutes  = require('./routes/userRoute');
 const commonRoutes  = require('./routes/commonRoute');
+const storeRoutes = require('./routes/storeRoute');
 
 app.listen(port, () => {
     console.log(`your app started successfully and is running at port: ${port}`);
@@ -33,4 +34,5 @@ app.use(cors());
 // ROUTES
 
 app.use('/api/user', userRoutes);
-app.use('/api/common',commonRoutes)
+app.use('/api/common',commonRoutes);
+app.use('/api/store', storeRoutes);

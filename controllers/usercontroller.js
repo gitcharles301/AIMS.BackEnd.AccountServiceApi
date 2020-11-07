@@ -71,4 +71,81 @@ exports.signOut = (req, res) => {
     });
 };
 
- 
+exports.GetuserProfile = async (req, res) => {
+
+    try {                
+
+        var result =  await sequelize.query('SELECT * FROM  fn_getuserprofile(:user_id,:store_id);',  { replacements: { user_id: req.body.user_id , store_id: req.body.store_id}, type: sequelize.QueryTypes.SELECT }).then(function(response){
+            res.status(200)
+          .json({
+              statuscode:200,
+              status : 'success',
+              data : response[0],
+              error : [{message: "", errorcode: ""}]
+          });       
+
+         });
+  }
+  catch(err) {
+      res.status(500)
+      .json({
+          statuscode:500,
+          status : 'failed',
+          data : {},
+          error : [{message: err.message, errorcode: 500}]
+      });
+  }
+};
+
+exports.AddPaymentInvoiceAddress = async (req, res) => {
+
+    try {                
+        var result = "1"
+      //  var result =  await sequelize.query('SELECT * FROM  AddPaymentInvoiceAddress(:user_id,:store_id);',  { replacements: { user_id: req.body.user_id , store_id: req.body.store_id}, type: sequelize.QueryTypes.SELECT }).then(function(response){
+            res.status(200)
+          .json({
+              statuscode:200,
+              status : 'success',
+              data : result,
+              error : [{message: "", errorcode: ""}]
+          });
+        
+
+        // });
+  }
+  catch(err) {
+      res.status(500)
+      .json({
+          statuscode:500,
+          status : 'failed',
+          data : {},
+          error : [{message: err.message, errorcode: 500}]
+      });
+  }
+};
+
+exports.AddPaymentDetail = async (req, res) => {
+
+    try {                
+
+      //  var result =  await sequelize.query('SELECT * FROM  AddPaymentDetail(:user_id,:store_id);',  { replacements: { user_id: req.body.user_id , store_id: req.body.store_id}, type: sequelize.QueryTypes.SELECT }).then(function(response){
+            res.status(200)
+          .json({
+              statuscode:200,
+              status : 'success',
+              data : {},
+              error : [{message: "", errorcode: ""}]
+          });        
+
+       //  });
+  }
+  catch(err) {
+      res.status(500)
+      .json({
+          statuscode:500,
+          status : 'failed',
+          data : {},
+          error : [{message: err.message, errorcode: 500}]
+      });
+  }
+};
