@@ -42,6 +42,9 @@ const schema =  {
                 expiredDate: joi.string().required(),
                 amount: joi.number().required(),
                 payment_status:joi.string().required()           
+        }),
+        GetUserRole : joi.object({                
+                user_id : joi.string().required()                     
         }) 
 };
 

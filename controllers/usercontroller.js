@@ -57,7 +57,7 @@ exports.signIn = async (req, res) => {
     res.cookie("authToken", authToken, { expire: new Date() + 9999 });
 
     // send response to the front end.
-
+     //var userObj = {}; 
     const { id, first_name, email, is_admin, is_universal_user  } = userObj;        
     return res.json({ authToken, user: { id, first_name, email, is_admin, is_universal_user  }});
 };
@@ -100,7 +100,7 @@ exports.GetuserProfile = async (req, res) => {
 exports.AddPaymentInvoiceAddress = async (req, res) => {
 
     try {                
-        var result = "1"
+        var result = { "user_id" : 10001, "invoiceAddress_id": 1 }
       //  var result =  await sequelize.query('SELECT * FROM  AddPaymentInvoiceAddress(:user_id,:store_id);',  { replacements: { user_id: req.body.user_id , store_id: req.body.store_id}, type: sequelize.QueryTypes.SELECT }).then(function(response){
             res.status(200)
           .json({
@@ -127,13 +127,13 @@ exports.AddPaymentInvoiceAddress = async (req, res) => {
 exports.AddPaymentDetail = async (req, res) => {
 
     try {                
-
+           var result = { "user_id" : 10001, "payment_id": 1 }
       //  var result =  await sequelize.query('SELECT * FROM  AddPaymentDetail(:user_id,:store_id);',  { replacements: { user_id: req.body.user_id , store_id: req.body.store_id}, type: sequelize.QueryTypes.SELECT }).then(function(response){
             res.status(200)
           .json({
               statuscode:200,
               status : 'success',
-              data : {},
+              data : { result },
               error : [{message: "", errorcode: ""}]
           });        
 
@@ -148,4 +148,23 @@ exports.AddPaymentDetail = async (req, res) => {
           error : [{message: err.message, errorcode: 500}]
       });
   }
+};
+
+
+exports.GetUserRole = async(req, res) => {
+    try {  
+     var result =  await sequelize.query('SELECT * FROM  getRolesFunction();', { raw: false }).then(function(response){
+        res.status(200)
+            .json({
+                status : 'success',
+                data : response[0],
+                error : [{message: "", errorcode: ""}]
+            });
+            console.log(response[0]);
+         
+          });
+    }
+    catch(err) {
+        console.log(err);
+    }
 };
