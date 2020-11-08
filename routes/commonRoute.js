@@ -5,9 +5,10 @@ const { check, validationResult, body } = require('express-validator');
 
 const router = express.Router();
 const { GetStateValidation,GetCitiesValidation } = require('../middleware/validation/common.validation');
+const { authenticateAIMSAdminToken } = require('../middleware/validation/auth.validation');
 
-router.get('/GetCountries', GetCountries);
-router.get('/GetStates', GetStateValidation, GetStates);
-router.get('/GetCities', GetCitiesValidation, GetCities);
+router.get('/GetCountries',authenticateAIMSAdminToken, GetCountries);
+router.get('/GetStates', authenticateAIMSAdminToken, GetStateValidation, GetStates);
+router.get('/GetCities',authenticateAIMSAdminToken, GetCitiesValidation, GetCities);
 
 module.exports = router;

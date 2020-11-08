@@ -7,12 +7,12 @@ const sequelize = new Sequelize(process.env.CONNECTION_STRING);
 
 exports.GetCountries = async(req, res) => {
     try {      
-     var result =  await sequelize.query('SELECT * FROM  fn_getcountry();', { raw: false }).then(function(response){
+     var result =  await sequelize.query('SELECT * FROM  fn_getcountry();',  {  type: sequelize.QueryTypes.SELECT }).then(function(response){
         res.status(200)
             .json({
                 statuscode:200,
                 status : 'success',
-                data : response[0],
+                data : response,
                 error : [{message: "", errorcode: ""}]
             });           
           
@@ -33,12 +33,12 @@ exports.GetCountries = async(req, res) => {
 exports.GetStates = async(req, res) => {
     try {                
 
-          var result =  await sequelize.query('SELECT * FROM  fn_getstate(:country_id);',  { replacements: { country_id: req.body.country_id }, type: sequelize.QueryTypes.SELECT }).then(function(response){
+          var result =  await sequelize.query('SELECT * FROM  fn_getstate(:country_id);',  { replacements: { country_id: req.query.country_id }, type: sequelize.QueryTypes.SELECT }).then(function(response){
         res.status(200)
             .json({
                 statuscode:200,
                 status : 'success',
-                data : response[0],
+                data : response,
                 error : [{message: "", errorcode: ""}]
             });
           
@@ -59,12 +59,12 @@ exports.GetStates = async(req, res) => {
 
 exports.GetCities = async(req, res) => {
     try {  
-        var result =  await sequelize.query('SELECT * FROM  fn_getcity(:state_id);',  { replacements: { state_id: req.body.state_id }, type: sequelize.QueryTypes.SELECT }).then(function(response){
+        var result =  await sequelize.query('SELECT * FROM  fn_getcity(:state_id);',  { replacements: { state_id: req.query.state_id }, type: sequelize.QueryTypes.SELECT }).then(function(response){
         res.status(200)
             .json({
                 statuscode:200,
                 status : 'success',
-                data : response[0],
+                data : response,
                 error : [{message: "", errorcode: ""}]
             });
             //console.log(response[0]);

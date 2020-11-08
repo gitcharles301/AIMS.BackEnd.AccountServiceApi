@@ -10,6 +10,7 @@ const sequelize = new Sequelize(process.env.CONNECTION_STRING) // Example for po
 const userRoutes  = require('./routes/userRoute');
 const commonRoutes  = require('./routes/commonRoute');
 const storeRoutes = require('./routes/storeRoute');
+const authRoutes = require('./routes/authRoute');
 
 app.listen(port, () => {
     console.log(`your app started successfully and is running at port: ${port}`);
@@ -36,3 +37,4 @@ app.use(cors());
 app.use('/api/user', userRoutes);
 app.use('/api/common',commonRoutes);
 app.use('/api/store', storeRoutes);
+app.use('/api/auth',authRoutes);

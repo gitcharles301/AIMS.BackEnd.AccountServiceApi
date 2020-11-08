@@ -4,8 +4,9 @@ const { GetRoles } = require('../controllers/roleController');
 
 const router = express.Router();
 const { SignUpValidation,SignInValidation, GetuserProfileValidation, GetStoresValidation, AddPaymentInvoiceValidation, AddPaymentDetailValidation, GetUserRoleValidation } = require('../middleware/validation/user.validation');
+const { authenticateAIMSAdminToken } = require('../middleware/validation/auth.validation');
 
-router.post('/signUp',SignUpValidation, signUp);
+router.post('/signUp', authenticateAIMSAdminToken, SignUpValidation, signUp);
 
 router.post('/signIn',SignInValidation, signIn);
 

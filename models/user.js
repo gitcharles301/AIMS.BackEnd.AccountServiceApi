@@ -5,12 +5,12 @@ const schema =  {
         SignUp : joi.object({
                 first_name : joi.string().max(200).required(),
                 last_name :  joi.string().max(200).required(),
-                emailid :   joi.string().email().required(),
+                user_emailid :   joi.string().email().required(),
                 password: joi.string().required(),
-                mobile_number: joi.number().required()
+                mobileno: joi.string().required()
         }),
         SignIn : joi.object({
-            user_id : joi.string().required(),
+            userid : joi.string().required(),
             password :  joi.string().required()         
         }),
         GetUserProfile : joi.object({                

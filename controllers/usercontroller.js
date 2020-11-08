@@ -1,16 +1,21 @@
+require("dotenv").config();  
 const { check, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const { v1: uuidv1 } = require('uuid');
 const { Sequelize  } = require('sequelize');
 const sequelize = new Sequelize(process.env.CONNECTION_STRING);
-
+const crypto = require('crypto');
 
 
 exports.signUp = async(req, res) => {
     try {
-         
-        var encrptedPassword = passwordEncrypt(req.body.password);
-        var result =  await sequelize.query('SELECT * FROM  fn_getstate(:country_id);',  { replacements: { country_id: req.body.country_id }, type: sequelize.QueryTypes.SELECT }).then(function(response){
+         console.log('signUp called');
+        var encrptedPassword = saltHashPassword(req.body.password);
+        console.log(encrptedPassword);
+        var result =  await sequelize.query('SELECT * FROM  fn_signup(:first_name, :last_name, :user_emailid, :mobileno, :password, :salt);', 
+         { replacements: { first_name: req.body.first_name , last_name: req.body.last_name, 
+            user_emailid: req.body.user_emailid, mobileno: req.body.mobileno, password: encrptedPassword.passwordHash, salt: encrptedPassword.salt }, type: sequelize.QueryTypes.SELECT }).then(function(response){                
+
             res.status(200)
                 .json({
                     statuscode:200,
@@ -18,7 +23,6 @@ exports.signUp = async(req, res) => {
                     data : response[0],
                     error : [{message: "", errorcode: ""}]
                 });
-              
     
                });
 
@@ -29,37 +33,69 @@ exports.signUp = async(req, res) => {
     }
 };
 
-exports.passwordEncrypt = function (plainPassword) {
-    // Remember to set the data value, otherwise it won't be validated
-    this.setDataValue('salt', uuidv1());
-    var securedHash = crypto.createHmac('sha256', this.salt)
-    .update(plainPassword)
-    .digest('hex');
-    this.setDataValue('password', securedHash);
- };
+
+ 
 
 exports.signIn = async (req, res) => {
-     // validate
+     
+    
+    // get user prfile
+     var result =  await sequelize.query('SELECT * FROM  fn_signin(:userid);', 
+     { replacements: { userid: req.body.userid  }, type: sequelize.QueryTypes.SELECT }).then(function(response){                
+         console.log(response[0].password);
+         console.log(response[0].salt);
+       // var result = response[0];
+        if(response[0].password == ""  || response[0].salt == "")
+        {
+            res.status(400)
+            .json({
+                statuscode:400,
+                status : 'failed',
+                data : {},
+                error : [{message: "Login Failed", errorcode: ""}]
+            });
+        }
+        else{
+            if(authenticatePassword(req.body.password, response[0].salt, response[0].password))
+            {
+                console.log('authendicated');
+                console.log(process.env.AIMS_SIGNIN_SECRET);
+                 // create a token
+                const authToken = jwt.sign({ id: response[0].userid }, process.env.AIMS_SIGNIN_SECRET);
+                  // put bearerToken into the cookie
 
-     const errors = validationResult(false);
+                 console.log(authToken);
+                res.cookie("authToken", authToken, { expire: new Date() + 9999 });
 
-     if(!errors.isEmpty()){
-         return res.status(400).json({
-             Message: "SignIn failed."
-         });
-     }
-    // create a token
+                var finalResult =
+                {
+                    authToken:authToken,
+                    userid:response[0].userid
+                };
+               
+                res.status(200)
+                .json({
+                    statuscode:200,
+                    status : 'success',
+                    data : finalResult,
+                    error : [{message: "", errorcode: ""}]
+                });
+                
+             } 
+             else{
+                res.status(400)
+                .json({
+                    statuscode:400,
+                    status : 'failed',
+                    data : {},
+                    error : [{message: "Login Failed", errorcode: ""}]
+                });
+             }
+            }
 
-    const authToken = jwt.sign({ id: userObj.id }, process.env.SECRET);
+           });
 
-    // put bearerToken into the cookie
-
-    res.cookie("authToken", authToken, { expire: new Date() + 9999 });
-
-    // send response to the front end.
-     //var userObj = {}; 
-    const { id, first_name, email, is_admin, is_universal_user  } = userObj;        
-    return res.json({ authToken, user: { id, first_name, email, is_admin, is_universal_user  }});
+  
 };
 
 exports.signOut = (req, res) => {
@@ -168,3 +204,49 @@ exports.GetUserRole = async(req, res) => {
         console.log(err);
     }
 };
+
+
+// Local Module functions
+
+var sha512 = function(password, salt){
+    var hash = crypto.createHmac('sha512', salt); /** Hashing algorithm sha512 */
+    hash.update(password);
+    var value = hash.digest('hex');
+    return {
+        salt:salt,
+        passwordHash:value
+    };
+};
+
+var genRandomString = function(length){
+    return crypto.randomBytes(Math.ceil(length/2))
+            .toString('hex') /** convert to hexadecimal format */
+            .slice(0,length);   /** return required number of characters */
+};
+
+var  saltHashPassword = function(userpassword) {
+    var salt = genRandomString(16); /** Gives us salt of length 16 */
+    var passwordData = sha512(userpassword, salt);
+    console.log('UserPassword = '+userpassword);
+    console.log('Passwordhash = '+passwordData.passwordHash);
+    console.log('nSalt = '+passwordData.salt);   
+    return passwordData;  
+};
+
+
+var securePassword = function(plainPassword, salt) {
+    if(!plainPassword || !salt) return "";
+
+    try {
+        return crypto.createHmac('sha512', salt)
+        .update(plainPassword)
+        .digest('hex');
+    } catch (err) {
+       return "";
+    }
+};
+
+var authenticatePassword = function(plainPassword, salt, dbPassword){
+        return securePassword(plainPassword, salt) == dbPassword;
+};
+
