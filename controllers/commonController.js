@@ -60,7 +60,7 @@ exports.GetStates = async(req, res) => {
 exports.GetCities = async(req, res) => {
     try {  
         var result =  await sequelize.query('SELECT * FROM  fn_getcity(:state_id);',  { replacements: { state_id: req.query.state_id }, type: sequelize.QueryTypes.SELECT }).then(function(response){
-        res.status(200)
+         res.status(200)
             .json({
                 statuscode:200,
                 status : 'success',

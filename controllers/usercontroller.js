@@ -15,8 +15,20 @@ exports.signUp = async(req, res) => {
         var result =  await sequelize.query('SELECT * FROM  fn_signup(:first_name, :last_name, :user_emailid, :mobileno, :password, :salt);', 
          { replacements: { first_name: req.body.first_name , last_name: req.body.last_name, 
             user_emailid: req.body.user_emailid, mobileno: req.body.mobileno, password: encrptedPassword.passwordHash, salt: encrptedPassword.salt }, type: sequelize.QueryTypes.SELECT }).then(function(response){                
+                            
+                if(response[0].error_counter > 0)
+                {
+                  return  res.status(400)
+                    .json({
+                        statuscode:400,
+                        status : 'validation-error',
+                        data : {},
+                        error : [{message: response[0].messages, errorcode: 400}]
+                    });
+                }
 
-            res.status(200)
+
+             return res.status(200)
                 .json({
                     statuscode:200,
                     status : 'success',
@@ -47,12 +59,12 @@ exports.signIn = async (req, res) => {
        // var result = response[0];
         if(response[0].password == ""  || response[0].salt == "")
         {
-            res.status(400)
+           return res.status(400)
             .json({
                 statuscode:400,
                 status : 'failed',
                 data : {},
-                error : [{message: "Login Failed", errorcode: ""}]
+                error : [{message: "Login Failed", errorcode: 400}]
             });
         }
         else{
@@ -73,7 +85,7 @@ exports.signIn = async (req, res) => {
                     userid:response[0].userid
                 };
                
-                res.status(200)
+                return res.status(200)
                 .json({
                     statuscode:200,
                     status : 'success',
@@ -83,7 +95,7 @@ exports.signIn = async (req, res) => {
                 
              } 
              else{
-                res.status(400)
+               return res.status(400)
                 .json({
                     statuscode:400,
                     status : 'failed',
