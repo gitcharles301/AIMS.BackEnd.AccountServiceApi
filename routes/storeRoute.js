@@ -3,8 +3,10 @@ const { GetStores, AddStore } = require('../controllers/storeController');
 
 const router = express.Router();
 const {  GetStoresValidation, AddStoreValidation } = require('../middleware/validation/store.validation');
+const { authenticateAIMSAdminToken, authenticateToken } = require('../middleware/validation/auth.validation');
 
-router.get('/GetStores',GetStoresValidation, GetStores);
-router.post('/AddStore', AddStoreValidation, AddStore);
+
+router.post('/AddStore', authenticateAIMSAdminToken,  AddStoreValidation, AddStore);
+router.get('/GetStores', authenticateToken, GetStoresValidation, GetStores); // SignedIn Token need sto be pass
 
 module.exports = router;

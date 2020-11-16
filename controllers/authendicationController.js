@@ -8,8 +8,7 @@ exports.GenerateAIMSToken = async(req, res) => {
     try {    
         
      if (process.env.AIMS_SECRET == req.body.aims_secret)   
-     {
-         console.log('called GenerateAIMSToken');
+     {       
          var result = await passwordEncrypt(process.env.AIMS_SECRET);
          res.cookie("authToken", result, { expire: new Date() + 9999 });
          res.status(200)
@@ -44,7 +43,6 @@ exports.GenerateAIMSToken = async(req, res) => {
 
 
 var passwordEncrypt = function (plainUserName) {
-    const authToken = jwt.sign({ id: "admin" }, process.env.AIMS_SECRET);
-    console.log(authToken);
+    const authToken = jwt.sign({ id: "admin" }, process.env.AIMS_SECRET);  
     return authToken;
  };

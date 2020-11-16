@@ -25,12 +25,14 @@ const schema =  {
                 first_name : joi.string().max(200).required(),
                 middle_name : joi.string().max(200).required(),
                 last_name :  joi.string().max(200).required(),
-                street1 :   joi.string().required(),
-                street2: joi.string().required(),
-                country_id: joi.number().required(),
-                state_id : joi.number().required(),
-                city_id: joi.number().required(),
-                zip : joi.string().max(5).required()
+                user_emailid :   joi.string().email().required(),
+                mobileno: joi.string().required(),
+                addressline1 :   joi.string().required(),
+                addressline2: joi.string().required(),
+                country: joi.string().required(),
+                state : joi.string().required(),
+                city: joi.string().required(),
+                zipcode : joi.string().max(10).required()               
         }),
        
         AddPaymentDetail: joi.object({
@@ -45,6 +47,19 @@ const schema =  {
         }),
         GetUserRole : joi.object({                
                 user_id : joi.string().required()                     
+        }),
+        VerifyUserEmail : joi.object({                
+                email_id :  joi.string().email().required()                    
+        }),
+        ResetPassword : joi.object({             
+                email_id :   joi.string().email().required(),
+                password: joi.string().required()
+        }),
+        AddCardDetail  : joi.object({
+                user_id : joi.string().required(),              
+                nameoncard :  joi.string().max(200).required(),
+                cardnumber :   joi.string().required(),
+                expirydate: joi.string().required()                       
         }) 
 };
 

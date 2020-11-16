@@ -4,8 +4,7 @@ const { States, Cities }  = require("../../models/common");
 
 module.exports = { 
         GetStateValidation: async(req,res,next) => {
-            console.log("called GetStateValidation");
-            console.log(req.query);
+            
             const value = await States.validate(req.query);
             //const validateheader = req.validateheader
                 if(value.error)
@@ -21,8 +20,7 @@ module.exports = {
                 }
         },
         GetCitiesValidation: async(req,res,next) => {
-            console.log("called GetCitiesValidation");
-            console.log(req.body);
+          
             const value = await Cities.validate(req.query);
                 if(value.error)
                 {

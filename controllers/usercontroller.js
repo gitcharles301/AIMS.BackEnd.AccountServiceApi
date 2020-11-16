@@ -5,13 +5,14 @@ const { v1: uuidv1 } = require('uuid');
 const { Sequelize  } = require('sequelize');
 const sequelize = new Sequelize(process.env.CONNECTION_STRING);
 const crypto = require('crypto');
+const utility = require('../helpers/utility');
 
 
 exports.signUp = async(req, res) => {
     try {
-         console.log('signUp called');
-        var encrptedPassword = saltHashPassword(req.body.password);
-        console.log(encrptedPassword);
+        
+        var encrptedPassword = utility.saltHashPassword(req.body.password);
+       
         var result =  await sequelize.query('SELECT * FROM  fn_signup(:first_name, :last_name, :user_emailid, :mobileno, :password, :salt);', 
          { replacements: { first_name: req.body.first_name , last_name: req.body.last_name, 
             user_emailid: req.body.user_emailid, mobileno: req.body.mobileno, password: encrptedPassword.passwordHash, salt: encrptedPassword.salt }, type: sequelize.QueryTypes.SELECT }).then(function(response){                
@@ -48,15 +49,13 @@ exports.signUp = async(req, res) => {
 
  
 
-exports.signIn = async (req, res) => {
-     
+exports.signIn = async (req, res) => {     
     
     // get user prfile
      var result =  await sequelize.query('SELECT * FROM  fn_signin(:userid);', 
-     { replacements: { userid: req.body.userid  }, type: sequelize.QueryTypes.SELECT }).then(function(response){                
-         console.log(response[0].password);
-         console.log(response[0].salt);
-       // var result = response[0];
+     { replacements: { userid: req.body.userid  }, type: sequelize.QueryTypes.SELECT }).then(function(response){             
+       
+     
         if(response[0].password == ""  || response[0].salt == "")
         {
            return res.status(400)
@@ -68,16 +67,12 @@ exports.signIn = async (req, res) => {
             });
         }
         else{
-            if(authenticatePassword(req.body.password, response[0].salt, response[0].password))
-            {
-                console.log('authendicated');
-                console.log(process.env.AIMS_SIGNIN_SECRET);
+            if(utility.authenticatePassword(req.body.password, response[0].salt, response[0].password))
+            { 
                  // create a token
                 const authToken = jwt.sign({ id: response[0].userid }, process.env.AIMS_SIGNIN_SECRET);
-                  // put bearerToken into the cookie
-
-                 console.log(authToken);
-                res.cookie("authToken", authToken, { expire: new Date() + 9999 });
+                // put bearerToken into the cookie              
+                res.cookie("authToken", authToken, { expire: new Date() + process.env.COOKIE_EXPIRE });
 
                 var finalResult =
                 {
@@ -147,19 +142,22 @@ exports.GetuserProfile = async (req, res) => {
 
 exports.AddPaymentInvoiceAddress = async (req, res) => {
 
-    try {                
-        var result = { "user_id" : 10001, "invoiceAddress_id": 1 }
-      //  var result =  await sequelize.query('SELECT * FROM  AddPaymentInvoiceAddress(:user_id,:store_id);',  { replacements: { user_id: req.body.user_id , store_id: req.body.store_id}, type: sequelize.QueryTypes.SELECT }).then(function(response){
-            res.status(200)
-          .json({
-              statuscode:200,
-              status : 'success',
-              data : result,
-              error : [{message: "", errorcode: ""}]
-          });
-        
+    try {  
+        var result =  await sequelize.query('SELECT * FROM  fn_addinvoiceaddress(:user_id, :first_name, :middle_name, :last_name, :user_emailid, :mobileno, :addressline1, :addressline2, :country, :state, :city, :zipcode);',
+        { replacements: { user_id: req.body.user_id, first_name: req.body.first_name, middle_name: req.body.middle_name, last_name: req.body.last_name, user_emailid: req.body.user_emailid, 
+            mobileno: req.body.mobileno, addressline1: req.body.addressline1, addressline2: req.body.addressline2, country: req.body.country, state: req.body.state, city: req.body.city, zipcode: req.body.zipcode 
+            
+       }, 
+       type: sequelize.QueryTypes.SELECT }).then(function(response){
+          res.status(200)
+        .json({
+            statuscode:200,
+            status : 'success',
+            data : response,
+            error : [{message: "", errorcode: ""}]
+        });
 
-        // });
+       });     
   }
   catch(err) {
       res.status(500)
@@ -171,6 +169,35 @@ exports.AddPaymentInvoiceAddress = async (req, res) => {
       });
   }
 };
+
+
+exports.AddCardDetail = async (req, res) => {
+
+    try {                
+
+        var result =  await sequelize.query('SELECT * FROM  fn_addcarddetails(:user_id, :nameoncard, :cardnumber, :expirydate);',  
+        { replacements: { user_id: req.body.user_id , nameoncard: req.body.nameoncard, cardnumber: req.body.cardnumber , expirydate: req.body.expirydate }, type: sequelize.QueryTypes.SELECT }).then(function(response){
+            res.status(200)
+          .json({
+              statuscode:200,
+              status : 'success',
+              data : response[0],
+              error : [{message: "", errorcode: ""}]
+          });       
+
+         });
+  }
+  catch(err) {
+      res.status(500)
+      .json({
+          statuscode:500,
+          status : 'failed',
+          data : {},
+          error : [{message: err.message, errorcode: 500}]
+      });
+  }
+};
+
 
 exports.AddPaymentDetail = async (req, res) => {
 
@@ -198,7 +225,6 @@ exports.AddPaymentDetail = async (req, res) => {
   }
 };
 
-
 exports.GetUserRole = async(req, res) => {
     try {  
      var result =  await sequelize.query('SELECT * FROM  getRolesFunction();', { raw: false }).then(function(response){
@@ -218,47 +244,55 @@ exports.GetUserRole = async(req, res) => {
 };
 
 
-// Local Module functions
+exports.VerifyUserEmail = async (req, res) => {
 
-var sha512 = function(password, salt){
-    var hash = crypto.createHmac('sha512', salt); /** Hashing algorithm sha512 */
-    hash.update(password);
-    var value = hash.digest('hex');
-    return {
-        salt:salt,
-        passwordHash:value
-    };
+    try {              
+
+        var result =  await sequelize.query('SELECT * FROM  fn_verifyuseremail(:email_id);',  { replacements: { email_id: req.query.email_id }, type: sequelize.QueryTypes.SELECT }).then(function(response){
+            res.status(200)
+          .json({
+              statuscode:200,
+              status : 'success',
+              data : response[0],
+              error : [{message: "", errorcode: ""}]
+          });        
+
+         });
+  }
+  catch(err) {
+      res.status(500)
+      .json({
+          statuscode:500,
+          status : 'failed',
+          data : {},
+          error : [{message: err.message, errorcode: 500}]
+      });
+  }
 };
 
-var genRandomString = function(length){
-    return crypto.randomBytes(Math.ceil(length/2))
-            .toString('hex') /** convert to hexadecimal format */
-            .slice(0,length);   /** return required number of characters */
+exports.ResetPassword = async (req, res) => {
+
+    try {             
+
+        var encrptedPassword = utility.saltHashPassword(req.body.password);
+        var result =  await sequelize.query('SELECT * FROM  fn_resetPassword(:email_id, :password, :salt);',  { replacements: { email_id: req.body.email_id, password: encrptedPassword.passwordHash, salt: encrptedPassword.salt }, type: sequelize.QueryTypes.SELECT }).then(function(response){
+            res.status(200)
+          .json({
+              statuscode:200,
+              status : 'success',
+              data : response[0],
+              error : [{message: "", errorcode: ""}]
+          });        
+
+         });
+  }
+  catch(err) {
+      res.status(500)
+      .json({
+          statuscode:500,
+          status : 'failed',
+          data : {},
+          error : [{message: err.message, errorcode: 500}]
+      });
+  }
 };
-
-var  saltHashPassword = function(userpassword) {
-    var salt = genRandomString(16); /** Gives us salt of length 16 */
-    var passwordData = sha512(userpassword, salt);
-    console.log('UserPassword = '+userpassword);
-    console.log('Passwordhash = '+passwordData.passwordHash);
-    console.log('nSalt = '+passwordData.salt);   
-    return passwordData;  
-};
-
-
-var securePassword = function(plainPassword, salt) {
-    if(!plainPassword || !salt) return "";
-
-    try {
-        return crypto.createHmac('sha512', salt)
-        .update(plainPassword)
-        .digest('hex');
-    } catch (err) {
-       return "";
-    }
-};
-
-var authenticatePassword = function(plainPassword, salt, dbPassword){
-        return securePassword(plainPassword, salt) == dbPassword;
-};
-

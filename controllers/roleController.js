@@ -13,9 +13,7 @@ exports.GetRoles = async(req, res) => {
                 status : 'success',
                 data : response[0],
                 error : [{message: "", errorcode: ""}]
-            });
-            console.log(response[0]);
-         
+            });        
           });
     }
     catch(err) {

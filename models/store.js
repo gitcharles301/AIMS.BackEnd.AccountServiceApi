@@ -6,16 +6,18 @@ const schema =  {
                 user_id : joi.string().required()                     
         }),
         AddStore : joi.object({
+                user_id: joi.string().required(),
                 store_name : joi.string().required(),
                 store_alias :  joi.string().required(),
                 street1 :   joi.string().required(),
                 street2: joi.string().required(),
-                country_id: joi.number().required(),
-                state_id : joi.number().required(),
-                city_id: joi.number().required(),
-                zip : joi.string().max(5).required(),
+                country: joi.string().required(),
+                state : joi.string().required(),
+                city: joi.string().required(),
+                zipcode : joi.string().max(10).required(),
                 store_landline :  joi.string().required(),
-                store_taxnumber :  joi.string().required()
+                store_tax_number :  joi.string().required(),
+                plan: joi.string().required()
         })
 };
 

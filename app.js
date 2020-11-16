@@ -11,6 +11,8 @@ const userRoutes  = require('./routes/userRoute');
 const commonRoutes  = require('./routes/commonRoute');
 const storeRoutes = require('./routes/storeRoute');
 const authRoutes = require('./routes/authRoute');
+const session = require('express-session')
+const FileStore = require('session-file-store')(session)
 
 app.listen(port, () => {
     console.log(`your app started successfully and is running at port: ${port}`);

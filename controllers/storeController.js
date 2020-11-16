@@ -8,15 +8,14 @@ exports.GetStores = async (req, res) => {
 
     try {                
 
-        var result =  await sequelize.query('SELECT * FROM  fn_getstores(:user_id);',  { replacements: { user_id: req.body.user_id }, type: sequelize.QueryTypes.SELECT }).then(function(response){
+        var result =  await sequelize.query('SELECT * FROM  fn_getstore(:user_id);',  { replacements: { user_id: req.query.user_id }, type: sequelize.QueryTypes.SELECT }).then(function(response){
             res.status(200)
           .json({
               statuscode:200,
               status : 'success',
               data : response[0],
               error : [{message: "", errorcode: ""}]
-          });
-        
+          });        
 
          });
   }
@@ -33,13 +32,22 @@ exports.GetStores = async (req, res) => {
 
 exports.AddStore = async (req, res) => {
     try {  
-        res.status(200)
+        var result =  await sequelize.query('SELECT * FROM  fn_addstore(:user_id,:store_name, :store_alias, :street1, :street2, :country, :state, :city, :zipcode, :store_landline, :store_tax_number, :plan);',
+          { replacements: { user_id: req.body.user_id, store_name: req.body.store_name, store_alias: req.body.store_alias, street1: req.body.street1, street2: req.body.street2, 
+            country: req.body.country, state: req.body.state, city: req.body.city, zipcode: req.body.zipcode, store_landline: req.body.store_landline, 
+            store_tax_number: req.body.store_tax_number, plan: req.body.plan
+         }, 
+         type: sequelize.QueryTypes.SELECT }).then(function(response){
+            res.status(200)
           .json({
               statuscode:200,
               status : 'success',
-              data : {},
+              data : response,
               error : [{message: "", errorcode: ""}]
-          });        
+          });
+        
+
+         });     
 
   }
   catch(err) {
