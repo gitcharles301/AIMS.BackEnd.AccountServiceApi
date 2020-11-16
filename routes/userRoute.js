@@ -8,11 +8,11 @@ const { authenticateAIMSAdminToken } = require('../middleware/validation/auth.va
 
 router.post('/signUp', authenticateAIMSAdminToken, SignUpValidation, signUp);
 
-router.post('/signIn',SignInValidation, signIn);
+router.post('/signIn',authenticateAIMSAdminToken, SignInValidation, signIn);
 
-router.get('/GetuserProfile',GetuserProfileValidation, GetuserProfile);
+router.get('/GetuserProfile',authenticateAIMSAdminToken, GetuserProfileValidation, GetuserProfile);
 
-router.post('/AddPaymentInvoiceAddress',AddPaymentInvoiceValidation, AddPaymentInvoiceAddress);
+router.post('/AddPaymentInvoiceAddress',authenticateAIMSAdminToken, AddPaymentInvoiceValidation, AddPaymentInvoiceAddress);
 
 //router.post('/AddPaymentDetail', AddPaymentDetailValidation, AddPaymentDetail);
 

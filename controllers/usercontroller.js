@@ -118,7 +118,7 @@ exports.GetuserProfile = async (req, res) => {
 
     try {                
 
-        var result =  await sequelize.query('SELECT * FROM  fn_getuserprofile(:user_id,:store_id);',  { replacements: { user_id: req.body.user_id , store_id: req.body.store_id}, type: sequelize.QueryTypes.SELECT }).then(function(response){
+        var result =  await sequelize.query('SELECT * FROM  fn_getuserprofile(:user_id,:store_id);',  { replacements: { user_id: req.query.user_id , store_id: req.query.store_id}, type: sequelize.QueryTypes.SELECT }).then(function(response){
             res.status(200)
           .json({
               statuscode:200,

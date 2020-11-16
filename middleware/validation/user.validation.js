@@ -33,7 +33,7 @@ module.exports = {
     },
     GetuserProfileValidation: async(req,res,next) => {
       
-        const value = await GetuserProfile.validate(req.body);
+        const value = await GetuserProfile.validate(req.query);
             if(value.error)
             {
                 res.status(400).json({  statuscode:400,
